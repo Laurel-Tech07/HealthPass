@@ -93,7 +93,7 @@ function confirmLogout(){ sheet(`<h2>Log out of HealthPass?</h2><p class="muted"
 
 async function complaintSheet(){ 
   try {
-    const res = await fetch('http://localhost:5000/api/ai/clinics', {
+    const res = await fetch('/api/ai/clinics', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('hp_token') }
     });
     const data = await res.json();
@@ -131,7 +131,7 @@ async function topUp(a){
     currency: "NGN",
     ref: 'HP-' + Math.floor((Math.random() * 1000000000) + 1), 
     callback: function(response){
-      fetch('http://localhost:5000/api/me/verify-payment', {
+      fetch('/api/me/verify-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ async function editProfile() {
     };
 
     try {
-      await fetch('http://localhost:5000/api/me', {
+      await fetch('/api/me', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ async function sendAIMessage(){
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const res = await fetch('http://localhost:5000/api/ai/chat', {
+    const res = await fetch('/api/ai/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -259,7 +259,7 @@ async function loadClinics(){
   $('#clist').innerHTML = '<div class="muted small">Searching...</div>';
 
   try {
-    const res = await fetch(`http://localhost:5000/api/ai/clinics?q=${q}&state=${state}`, {
+    const res = await fetch(`/api/ai/clinics?q=${q}&state=${state}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('hp_token') }
     });
     const data = await res.json();

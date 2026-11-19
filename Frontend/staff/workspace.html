@@ -125,7 +125,7 @@
       table.innerHTML = `<tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Stock</th><th>Status</th></tr><tr><td colspan="5" class="muted">Loading stock...</td></tr>`;
 
       try {
-        const res = await fetch('http://localhost:5000/api/inventory/items', {
+        const res = await fetch('/api/inventory/items', {
           headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
         });
         const data = await res.json();
@@ -164,7 +164,7 @@
       if(!name || !batch || !qty) return alert('Please fill name, batch, and quantity.');
       
       try {
-        const res = await fetch('http://localhost:5000/api/inventory', {
+        const res = await fetch('/api/inventory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
           body: JSON.stringify({ name, batch, quantity: Number(qty), expiry })
@@ -197,7 +197,7 @@
       chatBox.scrollTop = chatBox.scrollHeight;
 
       try {
-        const res = await fetch('http://localhost:5000/api/ai/chat', {
+        const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
           body: JSON.stringify({ message: msg })

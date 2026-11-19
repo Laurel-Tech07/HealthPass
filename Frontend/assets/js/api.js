@@ -1,5 +1,5 @@
 /* Frontend/assets/js/api.js */
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = '/api';
 
 async function fetchAPI(endpoint, method = 'GET', body = null, useStaffToken = false) {
   const token = useStaffToken ? localStorage.getItem('token') : localStorage.getItem('hp_token');

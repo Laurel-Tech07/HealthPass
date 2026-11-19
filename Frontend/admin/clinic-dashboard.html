@@ -51,7 +51,7 @@
   <script>
     if (!localStorage.getItem('token')) location.replace('login.html');
     const token = localStorage.getItem('token');
-    const API_BASE = 'http://localhost:5000/api/admin';
+    const API_BASE = '/api/admin';
     
     document.getElementById('logout').onclick = () => {
       localStorage.removeItem('token');

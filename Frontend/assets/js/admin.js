@@ -70,7 +70,7 @@ async function loadView() {
         const content = document.getElementById('src-content').value;
         if (!title || !url || !content) return alert('Fill all fields');
 
-        const res = await fetch('http://localhost:5000/api/ai/knowledge', {
+        const res = await fetch('/api/ai/knowledge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
           body: JSON.stringify({ title, url, content })

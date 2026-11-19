@@ -63,7 +63,7 @@
 
       // Fetch patient details from the backend
       try {
-        const res = await fetch(`http://localhost:5000/api/staff/patient/${patientId}`, {
+        const res = await fetch(`/api/staff/patient/${patientId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         

@@ -46,7 +46,7 @@
 
       try {
         // 1. Send credentials to backend
-        const res = await fetch('http://localhost:5000/api/auth/portal/login', {
+        const res = await fetch('/api/auth/portal/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
