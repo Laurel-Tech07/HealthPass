@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Clinic Admin • HealthPass</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <style>
+    body { background: #f8fafc; display: flex; height: 100vh; margin: 0; font-family: system-ui, sans-serif; }
+    .sidebar { width: 260px; background: #0f172a; color: #fff; padding: 24px 16px; display: flex; flex-direction: column; }
+    .brand { font-size: 20px; font-weight: bold; color: #2dd4bf; margin-bottom: 32px; padding-left: 8px; }
+    .sidebar a { display: block; padding: 12px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 4px; transition: 0.2s; }
+    .sidebar a:hover { background: #1e293b; color: #fff; }
+    .sidebar a.active { background: #2dd4bf; color: #0f172a; font-weight: bold; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .content { padding: 32px; overflow-y: auto; flex: 1; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .stat-card h1 { font-size: 32px; margin: 10px 0 0 0; color: #0f172a; }
+    .stat-card p { margin: 0; color: #64748b; font-weight: 500; font-size: 15px; }
+    .table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 20px; }
+    .table th { background: #f8fafc; padding: 16px; text-align: left; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #475569; }
+    .table td { padding: 16px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 500; }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-warn { background: #fef9c3; color: #854d0e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="brand">HealthPass Clinic</div>
+    <a href="#overview" class="active" onclick="switchTab('overview')">Clinic Overview</a>
+    <a href="#staff" onclick="switchTab('staff')">Manage Staff</a>
+    <a href="#patients" onclick="switchTab('patients')">Clinic Patients</a>
+    
+    <div style="margin-top: auto;">
+      <button class="btn" id="logout" style="width: 100%; background: #1e293b; border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer;">Log out</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <header class="topbar">
+      <h2 id="clinic-name" style="margin: 0; font-size: 18px; color: #0f172a;">Loading...</h2>
+      <span style="color: #64748b;">Dr. Halima Sule</span>
+    </header>
+    <div class="content" id="view"></div>
+  </main>
+
+  <script>
+    if (!localStorage.getItem('token')) location.replace('login.html');
+    const token = localStorage.getItem('token');
+    const API_BASE = 'http://localhost:5000/api/admin';
+    
+    document.getElementById('logout').onclick = () => {
+      localStorage.removeItem('token');
+      location.href = 'login.html';
+    };
+
+    async function switchTab(tab) {
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+      const activeLink = document.querySelector(`.sidebar a[href="#${tab}"]`);
+      if (activeLink) activeLink.classList.add('active');
+
+      const view = document.getElementById('view');
+      view.innerHTML = '<div class="muted" style="padding: 20px;">Loading...</div>';
+
+      try {
+        if (tab === 'overview') {
+          const res = await fetch(`${API_BASE}/clinic/overview`, { headers: { 'Authorization': 'Bearer ' + token } });
+          const data = await res.json();
+          
+          document.getElementById('clinic-name').textContent = data.name;
+          view.innerHTML = `
+            <div class="head"><h1>Clinic Overview</h1><p class="muted">Welcome back, Dr. Halima.</p></div>
+            <div class="grid4">
+              <div class="stat-card"><p>Active Staff</p><h1>${data.staffCount}</h1></div>
+              <div class="stat-card"><p>Registered Patients</p><h1>1</h1></div>
+              <div class="stat-card"><p>Pending Approvals</p><h1>0</h1></div>
+              <div class="stat-card"><p>Clinic Wallet</p><h1>₦${data.balance.toLocaleString()}</h1></div>
+            </div>
+          `;
+        }
+        else if (tab === 'staff') {
+          const res = await fetch(`${API_BASE}/clinic/staff`, { headers: { 'Authorization': 'Bearer ' + token } });
+          const staff = await res.json();
+
+          view.innerHTML = `
+            <div class="head"><h1>Manage Staff</h1><p class="muted">Staff members registered to your clinic.</p></div>
+            <table class="table">
+              <tr><th>Name</th><th>Title</th><th>Username</th><th>Status</th><th>Action</th></tr>
+              ${staff.map(s => `
+                <tr>
+                  <td><b>${s.name}</b></td>
+                  <td>${s.title || 'N/A'}</td>
+                  <td>${s.username}</td>
+                  <td><span class="badge ${s.status === 'approved' ? 'badge-ok' : 'badge-warn'}">${s.status}</span></td>
+                  <td>
+                    <button class="btn" style="padding: 6px 12px; font-size: 13px; background: ${s.status === 'approved' ? '#fee2e2' : '#dcfce7'}; color: ${s.status === 'approved' ? '#991b1b' : '#166534'};" 
+                      onclick="toggleStaff('${s.username}', '${s.status === 'approved' ? 'suspended' : 'approved'}')">
+                      ${s.status === 'approved' ? 'Suspend' : 'Approve'}
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </table>
+          `;
+        }
+        else if (tab === 'patients') {
+          const res = await fetch(`${API_BASE}/clinic/patients`, { headers: { 'Authorization': 'Bearer ' + token } });
+          const patients = await res.json();
+
+          view.innerHTML = `
+            <div class="head"><h1>Clinic Patients</h1><p class="muted">Patients registered in the system.</p></div>
+            <table class="table">
+              <tr><th>Name</th><th>HealthPass ID</th><th>Phone</th><th>Wallet Balance</th></tr>
+              ${patients.map(p => `
+                <tr>
+                  <td><b>${p.name}</b></td>
+                  <td>${p.qrid}</td>
+                  <td>${p.phone}</td>
+                  <td>₦${p.balance.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </table>
+          `;
+        }
+      } catch (error) {
+        view.innerHTML = `<div class="banner red" style="background:#fee2e2; padding:16px; border-radius:8px;">Error: Could not load data.</div>`;
+      }
+    }
+
+    async function toggleStaff(username, newStatus) {
+      if (!confirm(`Are you sure you want to change this staff member's status to ${newStatus}?`)) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/clinic/staff/${username}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (res.ok) {
+          alert(`Staff status updated to ${newStatus}`);
+          switchTab('staff'); 
+        } else {
+          const d = await res.json();
+          alert(d.message);
+        }
+      } catch (e) {
+        alert('Network error.');
+      }
+    }
+
+    switchTab('overview');
+  </script>
+</body>
+</html>
